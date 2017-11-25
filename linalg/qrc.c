@@ -223,108 +223,107 @@ gsl_linalg_complex_QR_svx (const gsl_matrix_complex * QR, const gsl_vector_compl
 //     }
 // }
 // 
-// 
-// int
-// gsl_linalg_QR_Rsolve (const gsl_matrix * QR, const gsl_vector * b, gsl_vector * x)
-// {
-//   if (QR->size1 != QR->size2)
-//     {
-//       GSL_ERROR ("QR matrix must be square", GSL_ENOTSQR);
-//     }
-//   else if (QR->size1 != b->size)
-//     {
-//       GSL_ERROR ("matrix size must match b size", GSL_EBADLEN);
-//     }
-//   else if (QR->size2 != x->size)
-//     {
-//       GSL_ERROR ("matrix size must match x size", GSL_EBADLEN);
-//     }
-//   else
-//     {
-//       /* Copy x <- b */
-// 
-//       gsl_vector_memcpy (x, b);
-// 
-//       /* Solve R x = b, storing x in-place */
-// 
-//       gsl_blas_dtrsv (CblasUpper, CblasNoTrans, CblasNonUnit, QR, x);
-// 
-//       return GSL_SUCCESS;
-//     }
-// }
-// 
-// 
-// int
-// gsl_linalg_QR_Rsvx (const gsl_matrix * QR, gsl_vector * x)
-// {
-//   if (QR->size1 != QR->size2)
-//     {
-//       GSL_ERROR ("QR matrix must be square", GSL_ENOTSQR);
-//     }
-//   else if (QR->size1 != x->size)
-//     {
-//       GSL_ERROR ("matrix size must match rhs size", GSL_EBADLEN);
-//     }
-//   else
-//     {
-//       /* Solve R x = b, storing x in-place */
-// 
-//       gsl_blas_dtrsv (CblasUpper, CblasNoTrans, CblasNonUnit, QR, x);
-// 
-//       return GSL_SUCCESS;
-//     }
-// }
-// 
-// int
-// gsl_linalg_R_solve (const gsl_matrix * R, const gsl_vector * b, gsl_vector * x)
-// {
-//   if (R->size1 != R->size2)
-//     {
-//       GSL_ERROR ("R matrix must be square", GSL_ENOTSQR);
-//     }
-//   else if (R->size1 != b->size)
-//     {
-//       GSL_ERROR ("matrix size must match b size", GSL_EBADLEN);
-//     }
-//   else if (R->size2 != x->size)
-//     {
-//       GSL_ERROR ("matrix size must match solution size", GSL_EBADLEN);
-//     }
-//   else
-//     {
-//       /* Copy x <- b */
-// 
-//       gsl_vector_memcpy (x, b);
-// 
-//       /* Solve R x = b, storing x inplace in b */
-// 
-//       gsl_blas_dtrsv (CblasUpper, CblasNoTrans, CblasNonUnit, R, x);
-// 
-//       return GSL_SUCCESS;
-//     }
-// }
-// 
-// int
-// gsl_linalg_R_svx (const gsl_matrix * R, gsl_vector * x)
-// {
-//   if (R->size1 != R->size2)
-//     {
-//       GSL_ERROR ("R matrix must be square", GSL_ENOTSQR);
-//     }
-//   else if (R->size2 != x->size)
-//     {
-//       GSL_ERROR ("matrix size must match solution size", GSL_EBADLEN);
-//     }
-//   else
-//     {
-//       /* Solve R x = b, storing x inplace in b */
-// 
-//       gsl_blas_dtrsv (CblasUpper, CblasNoTrans, CblasNonUnit, R, x);
-// 
-//       return GSL_SUCCESS;
-//     }
-// }
-// 
+
+int
+gsl_linalg_complex_QR_Rsolve (const gsl_matrix_complex * QR, const gsl_vector_complex * b, gsl_vector_complex * x)
+{
+  if (QR->size1 != QR->size2)
+    {
+      GSL_ERROR ("QR matrix must be square", GSL_ENOTSQR);
+    }
+  else if (QR->size1 != b->size)
+    {
+      GSL_ERROR ("matrix size must match b size", GSL_EBADLEN);
+    }
+  else if (QR->size2 != x->size)
+    {
+      GSL_ERROR ("matrix size must match x size", GSL_EBADLEN);
+    }
+  else
+    {
+      /* Copy x <- b */
+
+      gsl_vector_complex_memcpy (x, b);
+
+      /* Solve R x = b, storing x in-place */
+
+      gsl_blas_ztrsv (CblasUpper, CblasNoTrans, CblasNonUnit, QR, x);
+
+      return GSL_SUCCESS;
+    }
+}
+
+
+int
+gsl_linalg_complex_QR_Rsvx (const gsl_matrix_complex * QR, gsl_vector_complex * x)
+{
+  if (QR->size1 != QR->size2)
+    {
+      GSL_ERROR ("QR matrix must be square", GSL_ENOTSQR);
+    }
+  else if (QR->size1 != x->size)
+    {
+      GSL_ERROR ("matrix size must match rhs size", GSL_EBADLEN);
+    }
+  else
+    {
+      /* Solve R x = b, storing x in-place */
+
+      gsl_blas_ztrsv (CblasUpper, CblasNoTrans, CblasNonUnit, QR, x);
+
+      return GSL_SUCCESS;
+    }
+}
+
+int
+gsl_linalg_complex_R_solve (const gsl_matrix_complex * R, const gsl_vector_complex * b, gsl_vector_complex * x)
+{
+  if (R->size1 != R->size2)
+    {
+      GSL_ERROR ("R matrix must be square", GSL_ENOTSQR);
+    }
+  else if (R->size1 != b->size)
+    {
+      GSL_ERROR ("matrix size must match b size", GSL_EBADLEN);
+    }
+  else if (R->size2 != x->size)
+    {
+      GSL_ERROR ("matrix size must match solution size", GSL_EBADLEN);
+    }
+  else
+    {
+      /* Copy x <- b */
+
+      gsl_vector_complex_memcpy (x, b);
+
+      /* Solve R x = b, storing x inplace in b */
+
+      gsl_blas_ztrsv (CblasUpper, CblasNoTrans, CblasNonUnit, R, x);
+
+      return GSL_SUCCESS;
+    }
+}
+
+int
+gsl_linalg_complex_R_svx (const gsl_matrix_complex * R, gsl_vector_complex * x)
+{
+  if (R->size1 != R->size2)
+    {
+      GSL_ERROR ("R matrix must be square", GSL_ENOTSQR);
+    }
+  else if (R->size2 != x->size)
+    {
+      GSL_ERROR ("matrix size must match solution size", GSL_EBADLEN);
+    }
+  else
+    {
+      /* Solve R x = b, storing x inplace in b */
+
+      gsl_blas_ztrsv (CblasUpper, CblasNoTrans, CblasNonUnit, R, x);
+
+      return GSL_SUCCESS;
+    }
+}
 
 
 /* Form the product Q^T v  from a QR factorized matrix 
@@ -463,59 +462,59 @@ gsl_linalg_complex_QR_QTvec (const gsl_matrix_complex * QR, const gsl_vector_com
 //       return GSL_SUCCESS;
 //     }
 // }
-// 
-// /*  Form the orthogonal matrix Q from the packed QR matrix */
-// 
-// int
-// gsl_linalg_QR_unpack (const gsl_matrix * QR, const gsl_vector * tau, gsl_matrix * Q, gsl_matrix * R)
-// {
-//   const size_t M = QR->size1;
-//   const size_t N = QR->size2;
-// 
-//   if (Q->size1 != M || Q->size2 != M)
-//     {
-//       GSL_ERROR ("Q matrix must be M x M", GSL_ENOTSQR);
-//     }
-//   else if (R->size1 != M || R->size2 != N)
-//     {
-//       GSL_ERROR ("R matrix must be M x N", GSL_ENOTSQR);
-//     }
-//   else if (tau->size != GSL_MIN (M, N))
-//     {
-//       GSL_ERROR ("size of tau must be MIN(M,N)", GSL_EBADLEN);
-//     }
-//   else
-//     {
-//       size_t i, j;
-// 
-//       /* Initialize Q to the identity */
-// 
-//       gsl_matrix_set_identity (Q);
-// 
-//       for (i = GSL_MIN (M, N); i-- > 0;)
-//         {
-//           gsl_vector_const_view c = gsl_matrix_const_column (QR, i);
-//           gsl_vector_const_view h = gsl_vector_const_subvector (&c.vector,
-//                                                                 i, M - i);
-//           gsl_matrix_view m = gsl_matrix_submatrix (Q, i, i, M - i, M - i);
-//           double ti = gsl_vector_get (tau, i);
-//           gsl_linalg_householder_hm (ti, &h.vector, &m.matrix);
-//         }
-// 
-//       /*  Form the right triangular matrix R from a packed QR matrix */
-// 
-//       for (i = 0; i < M; i++)
-//         {
-//           for (j = 0; j < i && j < N; j++)
-//             gsl_matrix_set (R, i, j, 0.0);
-// 
-//           for (j = i; j < N; j++)
-//             gsl_matrix_set (R, i, j, gsl_matrix_get (QR, i, j));
-//         }
-// 
-//       return GSL_SUCCESS;
-//     }
-// }
+
+/*  Form the orthogonal matrix Q from the packed QR matrix */
+
+int
+gsl_linalg_complex_QR_unpack (const gsl_matrix_complex * QR, const gsl_vector_complex * tau, gsl_matrix_complex * Q, gsl_matrix_complex * R)
+{
+  const size_t M = QR->size1;
+  const size_t N = QR->size2;
+
+  if (Q->size1 != M || Q->size2 != M)
+    {
+      GSL_ERROR ("Q matrix must be M x M", GSL_ENOTSQR);
+    }
+  else if (R->size1 != M || R->size2 != N)
+    {
+      GSL_ERROR ("R matrix must be M x N", GSL_ENOTSQR);
+    }
+  else if (tau->size != GSL_MIN (M, N))
+    {
+      GSL_ERROR ("size of tau must be MIN(M,N)", GSL_EBADLEN);
+    }
+  else
+    {
+      size_t i, j;
+
+      /* Initialize Q to the identity */
+
+      gsl_matrix_complex_set_identity (Q);
+
+      for (i = GSL_MIN (M, N); i-- > 0;)
+        {
+          gsl_vector_complex_const_view c = gsl_matrix_complex_const_column (QR, i);
+          gsl_vector_complex_const_view h = gsl_vector_complex_const_subvector (&c.vector, i, M - i);
+          gsl_matrix_complex_view m = gsl_matrix_complex_submatrix (Q, i, i, M - i, M - i);
+          gsl_complex ti = gsl_vector_complex_get (tau, i);
+          /* we do not need the conjugate of ti here for some reason */
+          gsl_linalg_complex_householder_hm (ti, &h.vector, &m.matrix);
+        }
+
+      /*  Form the right triangular matrix R from a packed QR matrix */
+
+      for (i = 0; i < M; i++)
+        {
+          for (j = 0; j < i && j < N; j++)
+            gsl_matrix_complex_set (R, i, j, GSL_COMPLEX_ZERO);
+
+          for (j = i; j < N; j++)
+            gsl_matrix_complex_set (R, i, j, gsl_matrix_complex_get (QR, i, j));
+        }
+
+      return GSL_SUCCESS;
+    }
+}
 // 
 // 
 // /* Update a QR factorisation for A= Q R ,  A' = A + u v^T,
@@ -601,31 +600,31 @@ gsl_linalg_complex_QR_QTvec (const gsl_matrix_complex * QR, const gsl_vector_com
 //       return GSL_SUCCESS;
 //     }
 // }
-// 
-// int
-// gsl_linalg_QR_QRsolve (gsl_matrix * Q, gsl_matrix * R, const gsl_vector * b, gsl_vector * x)
-// {
-//   const size_t M = R->size1;
-//   const size_t N = R->size2;
-// 
-//   if (M != N)
-//     {
-//       return GSL_ENOTSQR;
-//     }
-//   else if (Q->size1 != M || b->size != M || x->size != M)
-//     {
-//       return GSL_EBADLEN;
-//     }
-//   else
-//     {
-//       /* compute sol = Q^T b */
-// 
-//       gsl_blas_dgemv (CblasTrans, 1.0, Q, b, 0.0, x);
-// 
-//       /* Solve R x = sol, storing x in-place */
-// 
-//       gsl_blas_dtrsv (CblasUpper, CblasNoTrans, CblasNonUnit, R, x);
-// 
-//       return GSL_SUCCESS;
-//     }
-// }
+
+int
+gsl_linalg_complex_QR_QRsolve (gsl_matrix_complex * Q, gsl_matrix_complex * R, const gsl_vector_complex * b, gsl_vector_complex * x)
+{
+  const size_t M = R->size1;
+  const size_t N = R->size2;
+
+  if (M != N)
+    {
+      return GSL_ENOTSQR;
+    }
+  else if (Q->size1 != M || b->size != M || x->size != M)
+    {
+      return GSL_EBADLEN;
+    }
+  else
+    {
+      /* compute sol = Q^T b */
+
+      gsl_blas_zgemv (CblasConjTrans, GSL_COMPLEX_ONE, Q, b, GSL_COMPLEX_ZERO, x);
+
+      /* Solve R x = sol, storing x in-place */
+
+      gsl_blas_ztrsv (CblasUpper, CblasNoTrans, CblasNonUnit, R, x);
+
+      return GSL_SUCCESS;
+    }
+}
