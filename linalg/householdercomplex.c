@@ -228,6 +228,19 @@ gsl_linalg_complex_householder_hv (gsl_complex tau, const gsl_vector_complex * v
   if (GSL_REAL(tau) == 0.0 && GSL_IMAG(tau) == 0.0)
       return GSL_SUCCESS;
 
+  /* treat the N=1 case separately */
+  if (N == 1)
+    {
+      gsl_complex w0 = gsl_vector_complex_get(w, 0);
+      gsl_complex tz = gsl_complex_mul(tau, w0);
+      gsl_complex ntz = gsl_complex_negative(tz);
+      gsl_complex w0ntz = gsl_complex_add(w0, ntz);
+
+      gsl_vector_complex_set(w, 0, w0ntz);
+
+      return GSL_SUCCESS;
+    }
+
   {
     /* compute z = v'w */
 

@@ -27,6 +27,7 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_blas.h>
+#include <gsl/gsl_complex_math.h>
 
 #include "apply_givens.c"
 
@@ -87,7 +88,8 @@ gsl_linalg_complex_QR_decomp (gsl_matrix_complex * A, gsl_vector_complex * tau)
           if (i + 1 < N)
             {
               gsl_matrix_complex_view m = gsl_matrix_complex_submatrix (A, i, i + 1, M - i, N - (i + 1));
-              gsl_linalg_complex_householder_hm (tau_i, &(c.vector), &(m.matrix));
+              gsl_complex tau_i_conj = gsl_complex_conjugate(tau_i);
+              gsl_linalg_complex_householder_hm (tau_i_conj, &(c.vector), &(m.matrix));
             }
         }
 
@@ -353,8 +355,9 @@ gsl_linalg_complex_QR_QTvec (const gsl_matrix_complex * QR, const gsl_vector_com
           gsl_vector_complex_const_view c = gsl_matrix_complex_const_column (QR, i);
           gsl_vector_complex_const_view h = gsl_vector_complex_const_subvector (&(c.vector), i, M - i);
           gsl_vector_complex_view w = gsl_vector_complex_subvector (v, i, M - i);
-          double ti = gsl_vector_complex_get (tau, i);
-          gsl_linalg_complex_householder_hv (ti, &(h.vector), &(w.vector));
+          gsl_complex ti = gsl_vector_complex_get (tau, i);
+          gsl_complex ti_conj = gsl_complex_conjugate(ti);
+          gsl_linalg_complex_householder_hv (ti_conj, &(h.vector), &(w.vector));
         }
       return GSL_SUCCESS;
     }
