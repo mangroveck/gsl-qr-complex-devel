@@ -299,6 +299,11 @@ int gsl_linalg_R_solve (const gsl_matrix * R,
 int gsl_linalg_R_svx (const gsl_matrix * R,
                       gsl_vector * x);
 
+/* complex QR decomposition */
+
+int gsl_linalg_complex_QR_decomp (gsl_matrix_complex * A,
+                                  gsl_vector_complex * tau);
+
 
 /* Q R P^T decomposition */
 
