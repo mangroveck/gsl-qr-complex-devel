@@ -95,75 +95,75 @@ gsl_linalg_complex_QR_decomp (gsl_matrix_complex * A, gsl_vector_complex * tau)
     }
 }
 
-// /* Solves the system A x = b using the QR factorisation,
-// 
-//  *  R x = Q^T b
-//  *
-//  * to obtain x. Based on SLATEC code. 
-//  */
-// 
-// int
-// gsl_linalg_QR_solve (const gsl_matrix * QR, const gsl_vector * tau, const gsl_vector * b, gsl_vector * x)
-// {
-//   if (QR->size1 != QR->size2)
-//     {
-//       GSL_ERROR ("QR matrix must be square", GSL_ENOTSQR);
-//     }
-//   else if (QR->size1 != b->size)
-//     {
-//       GSL_ERROR ("matrix size must match b size", GSL_EBADLEN);
-//     }
-//   else if (QR->size2 != x->size)
-//     {
-//       GSL_ERROR ("matrix size must match solution size", GSL_EBADLEN);
-//     }
-//   else
-//     {
-//       /* Copy x <- b */
-// 
-//       gsl_vector_memcpy (x, b);
-// 
-//       /* Solve for x */
-// 
-//       gsl_linalg_QR_svx (QR, tau, x);
-// 
-//       return GSL_SUCCESS;
-//     }
-// }
-// 
-// /* Solves the system A x = b in place using the QR factorisation,
-// 
-//  *  R x = Q^T b
-//  *
-//  * to obtain x. Based on SLATEC code. 
-//  */
-// 
-// int
-// gsl_linalg_QR_svx (const gsl_matrix * QR, const gsl_vector * tau, gsl_vector * x)
-// {
-// 
-//   if (QR->size1 != QR->size2)
-//     {
-//       GSL_ERROR ("QR matrix must be square", GSL_ENOTSQR);
-//     }
-//   else if (QR->size1 != x->size)
-//     {
-//       GSL_ERROR ("matrix size must match x/rhs size", GSL_EBADLEN);
-//     }
-//   else
-//     {
-//       /* compute rhs = Q^T b */
-// 
-//       gsl_linalg_QR_QTvec (QR, tau, x);
-// 
-//       /* Solve R x = rhs, storing x in-place */
-// 
-//       gsl_blas_dtrsv (CblasUpper, CblasNoTrans, CblasNonUnit, QR, x);
-// 
-//       return GSL_SUCCESS;
-//     }
-// }
-// 
+/* Solves the system A x = b using the QR factorisation,
+
+ *  R x = Q^T b
+ *
+ * to obtain x. Based on SLATEC code. 
+ */
+
+int
+gsl_linalg_complex_QR_solve (const gsl_matrix_complex * QR, const gsl_vector_complex * tau, const gsl_vector_complex * b, gsl_vector_complex * x)
+{
+  if (QR->size1 != QR->size2)
+    {
+      GSL_ERROR ("QR matrix must be square", GSL_ENOTSQR);
+    }
+  else if (QR->size1 != b->size)
+    {
+      GSL_ERROR ("matrix size must match b size", GSL_EBADLEN);
+    }
+  else if (QR->size2 != x->size)
+    {
+      GSL_ERROR ("matrix size must match solution size", GSL_EBADLEN);
+    }
+  else
+    {
+      /* Copy x <- b */
+
+      gsl_vector_complex_memcpy (x, b);
+
+      /* Solve for x */
+
+      gsl_linalg_complex_QR_svx (QR, tau, x);
+
+      return GSL_SUCCESS;
+    }
+}
+
+/* Solves the system A x = b in place using the QR factorisation,
+
+ *  R x = Q^T b
+ *
+ * to obtain x. Based on SLATEC code. 
+ */
+
+int
+gsl_linalg_complex_QR_svx (const gsl_matrix_complex * QR, const gsl_vector_complex * tau, gsl_vector_complex * x)
+{
+
+  if (QR->size1 != QR->size2)
+    {
+      GSL_ERROR ("QR matrix must be square", GSL_ENOTSQR);
+    }
+  else if (QR->size1 != x->size)
+    {
+      GSL_ERROR ("matrix size must match x/rhs size", GSL_EBADLEN);
+    }
+  else
+    {
+      /* compute rhs = Q^T b */
+
+      gsl_linalg_complex_QR_QTvec (QR, tau, x);
+
+      /* Solve R x = rhs, storing x in-place */
+
+      gsl_blas_ztrsv (CblasUpper, CblasNoTrans, CblasNonUnit, QR, x);
+
+      return GSL_SUCCESS;
+    }
+}
+
 // 
 // /* Find the least squares solution to the overdetermined system 
 //  *
@@ -323,43 +323,43 @@ gsl_linalg_complex_QR_decomp (gsl_matrix_complex * A, gsl_vector_complex * tau)
 //     }
 // }
 // 
-// 
-// 
-// /* Form the product Q^T v  from a QR factorized matrix 
-//  */
-// 
-// int
-// gsl_linalg_QR_QTvec (const gsl_matrix * QR, const gsl_vector * tau, gsl_vector * v)
-// {
-//   const size_t M = QR->size1;
-//   const size_t N = QR->size2;
-// 
-//   if (tau->size != GSL_MIN (M, N))
-//     {
-//       GSL_ERROR ("size of tau must be MIN(M,N)", GSL_EBADLEN);
-//     }
-//   else if (v->size != M)
-//     {
-//       GSL_ERROR ("vector size must be M", GSL_EBADLEN);
-//     }
-//   else
-//     {
-//       size_t i;
-// 
-//       /* compute Q^T v */
-// 
-//       for (i = 0; i < GSL_MIN (M, N); i++)
-//         {
-//           gsl_vector_const_view c = gsl_matrix_const_column (QR, i);
-//           gsl_vector_const_view h = gsl_vector_const_subvector (&(c.vector), i, M - i);
-//           gsl_vector_view w = gsl_vector_subvector (v, i, M - i);
-//           double ti = gsl_vector_get (tau, i);
-//           gsl_linalg_householder_hv (ti, &(h.vector), &(w.vector));
-//         }
-//       return GSL_SUCCESS;
-//     }
-// }
-// 
+
+
+/* Form the product Q^T v  from a QR factorized matrix 
+ */
+
+int
+gsl_linalg_complex_QR_QTvec (const gsl_matrix_complex * QR, const gsl_vector_complex * tau, gsl_vector_complex * v)
+{
+  const size_t M = QR->size1;
+  const size_t N = QR->size2;
+
+  if (tau->size != GSL_MIN (M, N))
+    {
+      GSL_ERROR ("size of tau must be MIN(M,N)", GSL_EBADLEN);
+    }
+  else if (v->size != M)
+    {
+      GSL_ERROR ("vector size must be M", GSL_EBADLEN);
+    }
+  else
+    {
+      size_t i;
+
+      /* compute Q^T v */
+
+      for (i = 0; i < GSL_MIN (M, N); i++)
+        {
+          gsl_vector_complex_const_view c = gsl_matrix_complex_const_column (QR, i);
+          gsl_vector_complex_const_view h = gsl_vector_complex_const_subvector (&(c.vector), i, M - i);
+          gsl_vector_complex_view w = gsl_vector_complex_subvector (v, i, M - i);
+          double ti = gsl_vector_complex_get (tau, i);
+          gsl_linalg_complex_householder_hv (ti, &(h.vector), &(w.vector));
+        }
+      return GSL_SUCCESS;
+    }
+}
+
 // 
 // int
 // gsl_linalg_QR_Qvec (const gsl_matrix * QR, const gsl_vector * tau, gsl_vector * v)

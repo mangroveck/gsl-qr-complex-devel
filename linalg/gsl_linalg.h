@@ -305,6 +305,73 @@ int gsl_linalg_complex_QR_decomp (gsl_matrix_complex * A,
                                   gsl_vector_complex * tau);
 
 
+int gsl_linalg_complex_QR_solve (const gsl_matrix_complex * QR,
+                                 const gsl_vector_complex * tau,
+                                 const gsl_vector_complex * b,
+                                 gsl_vector_complex * x);
+
+
+int gsl_linalg_complex_QR_svx (const gsl_matrix_complex * QR,
+                               const gsl_vector_complex * tau,
+                               gsl_vector_complex * x);
+
+/*
+int gsl_linalg_QR_lssolve (const gsl_matrix * QR, 
+                           const gsl_vector * tau, 
+                           const gsl_vector * b, 
+                           gsl_vector * x, 
+                           gsl_vector * residual);
+
+
+int gsl_linalg_QR_QRsolve (gsl_matrix * Q,
+                           gsl_matrix * R,
+                           const gsl_vector * b,
+                           gsl_vector * x);
+
+int gsl_linalg_QR_Rsolve (const gsl_matrix * QR,
+                          const gsl_vector * b,
+                          gsl_vector * x);
+
+int gsl_linalg_QR_Rsvx (const gsl_matrix * QR,
+                        gsl_vector * x);
+
+int gsl_linalg_QR_update (gsl_matrix * Q,
+                          gsl_matrix * R,
+                          gsl_vector * w,
+                          const gsl_vector * v);
+*/
+
+int gsl_linalg_complex_QR_QTvec (const gsl_matrix_complex * QR,
+                                 const gsl_vector_complex * tau,
+                                 gsl_vector_complex * v);
+
+/*
+int gsl_linalg_QR_Qvec (const gsl_matrix * QR,
+                        const gsl_vector * tau,
+                        gsl_vector * v);
+
+int gsl_linalg_QR_QTmat (const gsl_matrix * QR,
+                         const gsl_vector * tau,
+                         gsl_matrix * A);
+
+int gsl_linalg_QR_matQ (const gsl_matrix * QR,
+                        const gsl_vector * tau,
+                        gsl_matrix * A);
+
+int gsl_linalg_QR_unpack (const gsl_matrix * QR,
+                          const gsl_vector * tau,
+                          gsl_matrix * Q,
+                          gsl_matrix * R);
+
+int gsl_linalg_R_solve (const gsl_matrix * R,
+                        const gsl_vector * b,
+                        gsl_vector * x);
+
+int gsl_linalg_R_svx (const gsl_matrix * R,
+                      gsl_vector * x);
+*/
+
+
 /* Q R P^T decomposition */
 
 int gsl_linalg_QRPT_decomp (gsl_matrix * A,
