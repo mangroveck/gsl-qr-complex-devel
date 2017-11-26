@@ -31,6 +31,11 @@
 
 #include "apply_givens.c"
 
+/* TODO finish converting functios
+   TODO correct documentation
+   TODO write test cases
+*/
+
 /* Factorise a general M x N matrix A into
  *  
  *   A = Q R
@@ -166,63 +171,63 @@ gsl_linalg_complex_QR_svx (const gsl_matrix_complex * QR, const gsl_vector_compl
     }
 }
 
-// 
-// /* Find the least squares solution to the overdetermined system 
-//  *
-//  *   A x = b 
-//  *  
-//  * for M >= N using the QR factorization A = Q R. 
-//  */
-// 
-// int
-// gsl_linalg_QR_lssolve (const gsl_matrix * QR, const gsl_vector * tau, const gsl_vector * b, gsl_vector * x, gsl_vector * residual)
-// {
-//   const size_t M = QR->size1;
-//   const size_t N = QR->size2;
-// 
-//   if (M < N)
-//     {
-//       GSL_ERROR ("QR matrix must have M>=N", GSL_EBADLEN);
-//     }
-//   else if (M != b->size)
-//     {
-//       GSL_ERROR ("matrix size must match b size", GSL_EBADLEN);
-//     }
-//   else if (N != x->size)
-//     {
-//       GSL_ERROR ("matrix size must match solution size", GSL_EBADLEN);
-//     }
-//   else if (M != residual->size)
-//     {
-//       GSL_ERROR ("matrix size must match residual size", GSL_EBADLEN);
-//     }
-//   else
-//     {
-//       gsl_matrix_const_view R = gsl_matrix_const_submatrix (QR, 0, 0, N, N);
-//       gsl_vector_view c = gsl_vector_subvector(residual, 0, N);
-// 
-//       gsl_vector_memcpy(residual, b);
-// 
-//       /* compute rhs = Q^T b */
-// 
-//       gsl_linalg_QR_QTvec (QR, tau, residual);
-// 
-//       /* Solve R x = rhs */
-// 
-//       gsl_vector_memcpy(x, &(c.vector));
-// 
-//       gsl_blas_dtrsv (CblasUpper, CblasNoTrans, CblasNonUnit, &(R.matrix), x);
-// 
-//       /* Compute residual = b - A x = Q (Q^T b - R x) */
-//       
-//       gsl_vector_set_zero(&(c.vector));
-// 
-//       gsl_linalg_QR_Qvec(QR, tau, residual);
-// 
-//       return GSL_SUCCESS;
-//     }
-// }
-// 
+
+/* Find the least squares solution to the overdetermined system 
+ *
+ *   A x = b 
+ *  
+ * for M >= N using the QR factorization A = Q R. 
+ */
+
+int
+gsl_linalg_complex_QR_lssolve (const gsl_matrix_complex * QR, const gsl_vector_complex * tau, const gsl_vector_complex * b, gsl_vector_complex * x, gsl_vector_complex * residual)
+{
+  const size_t M = QR->size1;
+  const size_t N = QR->size2;
+
+  if (M < N)
+    {
+      GSL_ERROR ("QR matrix must have M>=N", GSL_EBADLEN);
+    }
+  else if (M != b->size)
+    {
+      GSL_ERROR ("matrix size must match b size", GSL_EBADLEN);
+    }
+  else if (N != x->size)
+    {
+      GSL_ERROR ("matrix size must match solution size", GSL_EBADLEN);
+    }
+  else if (M != residual->size)
+    {
+      GSL_ERROR ("matrix size must match residual size", GSL_EBADLEN);
+    }
+  else
+    {
+      gsl_matrix_complex_const_view R = gsl_matrix_complex_const_submatrix (QR, 0, 0, N, N);
+      gsl_vector_complex_view c = gsl_vector_complex_subvector(residual, 0, N);
+
+      gsl_vector_complex_memcpy(residual, b);
+
+      /* compute rhs = Q^T b */
+
+      gsl_linalg_complex_QR_QTvec (QR, tau, residual);
+
+      /* Solve R x = rhs */
+
+      gsl_vector_complex_memcpy(x, &(c.vector));
+
+      gsl_blas_ztrsv (CblasUpper, CblasNoTrans, CblasNonUnit, &(R.matrix), x);
+
+      /* Compute residual = b - A x = Q (Q^T b - R x) */
+      
+      gsl_vector_complex_set_zero(&(c.vector));
+
+      gsl_linalg_complex_QR_Qvec(QR, tau, residual);
+
+      return GSL_SUCCESS;
+    }
+}
+
 
 int
 gsl_linalg_complex_QR_Rsolve (const gsl_matrix_complex * QR, const gsl_vector_complex * b, gsl_vector_complex * x)
@@ -362,106 +367,109 @@ gsl_linalg_complex_QR_QTvec (const gsl_matrix_complex * QR, const gsl_vector_com
     }
 }
 
-// 
-// int
-// gsl_linalg_QR_Qvec (const gsl_matrix * QR, const gsl_vector * tau, gsl_vector * v)
-// {
-//   const size_t M = QR->size1;
-//   const size_t N = QR->size2;
-// 
-//   if (tau->size != GSL_MIN (M, N))
-//     {
-//       GSL_ERROR ("size of tau must be MIN(M,N)", GSL_EBADLEN);
-//     }
-//   else if (v->size != M)
-//     {
-//       GSL_ERROR ("vector size must be M", GSL_EBADLEN);
-//     }
-//   else
-//     {
-//       size_t i;
-// 
-//       /* compute Q v */
-// 
-//       for (i = GSL_MIN (M, N); i-- > 0;)
-//         {
-//           gsl_vector_const_view c = gsl_matrix_const_column (QR, i);
-//           gsl_vector_const_view h = gsl_vector_const_subvector (&(c.vector), 
-//                                                                 i, M - i);
-//           gsl_vector_view w = gsl_vector_subvector (v, i, M - i);
-//           double ti = gsl_vector_get (tau, i);
-//           gsl_linalg_householder_hv (ti, &h.vector, &w.vector);
-//         }
-//       return GSL_SUCCESS;
-//     }
-// }
-// 
-// /* Form the product Q^T A from a QR factorized matrix */
-// 
-// int
-// gsl_linalg_QR_QTmat (const gsl_matrix * QR, const gsl_vector * tau, gsl_matrix * A)
-// {
-//   const size_t M = QR->size1;
-//   const size_t N = QR->size2;
-// 
-//   if (tau->size != GSL_MIN (M, N))
-//     {
-//       GSL_ERROR ("size of tau must be MIN(M,N)", GSL_EBADLEN);
-//     }
-//   else if (A->size1 != M)
-//     {
-//       GSL_ERROR ("matrix must have M rows", GSL_EBADLEN);
-//     }
-//   else
-//     {
-//       size_t i;
-// 
-//       /* compute Q^T A */
-// 
-//       for (i = 0; i < GSL_MIN (M, N); i++)
-//         {
-//           gsl_vector_const_view c = gsl_matrix_const_column (QR, i);
-//           gsl_vector_const_view h = gsl_vector_const_subvector (&(c.vector), i, M - i);
-//           gsl_matrix_view m = gsl_matrix_submatrix(A, i, 0, M - i, A->size2);
-//           double ti = gsl_vector_get (tau, i);
-//           gsl_linalg_householder_hm (ti, &(h.vector), &(m.matrix));
-//         }
-//       return GSL_SUCCESS;
-//     }
-// }
-// 
-// /* Form the product A Q from a QR factorized matrix */
-// int
-// gsl_linalg_QR_matQ (const gsl_matrix * QR, const gsl_vector * tau, gsl_matrix * A)
-// {
-//   const size_t M = QR->size1;
-//   const size_t N = QR->size2;
-// 
-//   if (tau->size != GSL_MIN (M, N))
-//     {
-//       GSL_ERROR ("size of tau must be MIN(M,N)", GSL_EBADLEN);
-//     }
-//   else if (A->size2 != M)
-//     {
-//       GSL_ERROR ("matrix must have M columns", GSL_EBADLEN);
-//     }
-//   else
-//     {
-//       size_t i;
-// 
-//       /* compute A Q */
-// 
-//       for (i = 0; i < GSL_MIN (M, N); i++)
-//         {
-//           gsl_vector_const_view c = gsl_matrix_const_column (QR, i);
-//           gsl_vector_const_view h = gsl_vector_const_subvector (&(c.vector), i, M - i);
-//           gsl_matrix_view m = gsl_matrix_submatrix(A, 0, i, A->size1, M - i);
-//           double ti = gsl_vector_get (tau, i);
-//           gsl_linalg_householder_mh (ti, &(h.vector), &(m.matrix));
-//         }
-//       return GSL_SUCCESS;
-//     }
-// }
+
+int
+gsl_linalg_complex_QR_Qvec (const gsl_matrix_complex * QR, const gsl_vector_complex * tau, gsl_vector_complex * v)
+{
+  const size_t M = QR->size1;
+  const size_t N = QR->size2;
+
+  if (tau->size != GSL_MIN (M, N))
+    {
+      GSL_ERROR ("size of tau must be MIN(M,N)", GSL_EBADLEN);
+    }
+  else if (v->size != M)
+    {
+      GSL_ERROR ("vector size must be M", GSL_EBADLEN);
+    }
+  else
+    {
+      size_t i;
+
+      /* compute Q v */
+
+      for (i = GSL_MIN (M, N); i-- > 0;)
+        {
+          gsl_vector_complex_const_view c = gsl_matrix_complex_const_column (QR, i);
+          gsl_vector_complex_const_view h = gsl_vector_complex_const_subvector (&(c.vector), 
+                                                                i, M - i);
+          gsl_vector_complex_view w = gsl_vector_complex_subvector (v, i, M - i);
+          gsl_complex ti = gsl_vector_complex_get (tau, i);
+          /* we do not need the conjugate of ti here */ // TODO why?
+          gsl_linalg_complex_householder_hv (ti, &h.vector, &w.vector);
+        }
+      return GSL_SUCCESS;
+    }
+}
+
+/* Form the product Q^T A from a QR factorized matrix */
+
+int
+gsl_linalg_complex_QR_QTmat (const gsl_matrix_complex * QR, const gsl_vector_complex * tau, gsl_matrix_complex * A)
+{
+  const size_t M = QR->size1;
+  const size_t N = QR->size2;
+
+  if (tau->size != GSL_MIN (M, N))
+    {
+      GSL_ERROR ("size of tau must be MIN(M,N)", GSL_EBADLEN);
+    }
+  else if (A->size1 != M)
+    {
+      GSL_ERROR ("matrix must have M rows", GSL_EBADLEN);
+    }
+  else
+    {
+      size_t i;
+
+      /* compute Q^T A */
+
+      for (i = 0; i < GSL_MIN (M, N); i++)
+        {
+          gsl_vector_complex_const_view c = gsl_matrix_complex_const_column (QR, i);
+          gsl_vector_complex_const_view h = gsl_vector_complex_const_subvector (&(c.vector), i, M - i);
+          gsl_matrix_complex_view m = gsl_matrix_complex_submatrix(A, i, 0, M - i, A->size2);
+          gsl_complex ti = gsl_vector_complex_get (tau, i);
+          gsl_complex ti_conj = gsl_complex_conjugate(ti);
+          gsl_linalg_complex_householder_hm (ti_conj, &(h.vector), &(m.matrix));
+        }
+      return GSL_SUCCESS;
+    }
+}
+
+/* Form the product A Q from a QR factorized matrix */
+int
+gsl_linalg_complex_QR_matQ (const gsl_matrix_complex * QR, const gsl_vector_complex * tau, gsl_matrix_complex * A)
+{
+  const size_t M = QR->size1;
+  const size_t N = QR->size2;
+
+  if (tau->size != GSL_MIN (M, N))
+    {
+      GSL_ERROR ("size of tau must be MIN(M,N)", GSL_EBADLEN);
+    }
+  else if (A->size2 != M)
+    {
+      GSL_ERROR ("matrix must have M columns", GSL_EBADLEN);
+    }
+  else
+    {
+      size_t i;
+
+      /* compute A Q */
+
+      for (i = 0; i < GSL_MIN (M, N); i++)
+        {
+          gsl_vector_complex_const_view c = gsl_matrix_complex_const_column (QR, i);
+          gsl_vector_complex_const_view h = gsl_vector_complex_const_subvector (&(c.vector), i, M - i);
+          gsl_matrix_complex_view m = gsl_matrix_complex_submatrix(A, 0, i, A->size1, M - i);
+          gsl_complex ti = gsl_vector_complex_get (tau, i);
+          /* we do not need the conjugate of ti here */ // TODO why?
+          gsl_linalg_complex_householder_mh (ti, &(h.vector), &(m.matrix));
+        }
+      return GSL_SUCCESS;
+    }
+}
 
 /*  Form the orthogonal matrix Q from the packed QR matrix */
 
@@ -497,7 +505,7 @@ gsl_linalg_complex_QR_unpack (const gsl_matrix_complex * QR, const gsl_vector_co
           gsl_vector_complex_const_view h = gsl_vector_complex_const_subvector (&c.vector, i, M - i);
           gsl_matrix_complex_view m = gsl_matrix_complex_submatrix (Q, i, i, M - i, M - i);
           gsl_complex ti = gsl_vector_complex_get (tau, i);
-          /* we do not need the conjugate of ti here for some reason */
+          /* we do not need the conjugate of ti here */ // TODO why?
           gsl_linalg_complex_householder_hm (ti, &h.vector, &m.matrix);
         }
 

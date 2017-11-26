@@ -315,14 +315,11 @@ int gsl_linalg_complex_QR_svx (const gsl_matrix_complex * QR,
                                const gsl_vector_complex * tau,
                                gsl_vector_complex * x);
 
-/*
-int gsl_linalg_QR_lssolve (const gsl_matrix * QR, 
-                           const gsl_vector * tau, 
-                           const gsl_vector * b, 
-                           gsl_vector * x, 
-                           gsl_vector * residual);
-
-*/
+int gsl_linalg_complex_QR_lssolve (const gsl_matrix_complex * QR, 
+                                   const gsl_vector_complex * tau, 
+                                   const gsl_vector_complex * b, 
+                                   gsl_vector_complex * x, 
+                                   gsl_vector_complex * residual);
 
 int gsl_linalg_complex_QR_QRsolve (gsl_matrix_complex * Q,
                                    gsl_matrix_complex * R,
@@ -347,19 +344,17 @@ int gsl_linalg_complex_QR_QTvec (const gsl_matrix_complex * QR,
                                  const gsl_vector_complex * tau,
                                  gsl_vector_complex * v);
 
-/*
-int gsl_linalg_QR_Qvec (const gsl_matrix * QR,
-                        const gsl_vector * tau,
-                        gsl_vector * v);
+int gsl_linalg_complex_QR_Qvec (const gsl_matrix_complex * QR,
+                                const gsl_vector_complex * tau,
+                                gsl_vector_complex * v);
 
-int gsl_linalg_QR_QTmat (const gsl_matrix * QR,
-                         const gsl_vector * tau,
-                         gsl_matrix * A);
+int gsl_linalg_complex_QR_QTmat (const gsl_matrix_complex * QR,
+                                 const gsl_vector_complex * tau,
+                                 gsl_matrix_complex * A);
 
-int gsl_linalg_QR_matQ (const gsl_matrix * QR,
-                        const gsl_vector * tau,
-                        gsl_matrix * A);
-*/
+int gsl_linalg_complex_QR_matQ (const gsl_matrix_complex * QR,
+                                const gsl_vector_complex * tau,
+                                gsl_matrix_complex * A);
 
 int gsl_linalg_complex_QR_unpack (const gsl_matrix_complex * QR,
                                   const gsl_vector_complex * tau,
