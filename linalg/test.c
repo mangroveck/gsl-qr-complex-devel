@@ -2,6 +2,7 @@
  * 
  * Copyright (C) 1996, 1997, 1998, 1999, 2000, 2004, 2005, 2006, 2007, 2010 Gerard Jungman, Brian Gough
  * Copyright (C) Huan Wu (test_choleskyc_invert and test_choleskyc_invert_dim)
+ * Copyright (C) 2017 Christian Krueger (test_QRc_*)
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
