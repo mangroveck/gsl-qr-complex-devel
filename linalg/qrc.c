@@ -397,7 +397,7 @@ gsl_linalg_complex_QR_Qvec (const gsl_matrix_complex * QR, const gsl_vector_comp
                                                                 i, M - i);
           gsl_vector_complex_view w = gsl_vector_complex_subvector (v, i, M - i);
           gsl_complex ti = gsl_vector_complex_get (tau, i);
-          /* we do not need the conjugate of ti here */ // TODO why?
+          /* we do not need the conjugate of ti here */
           gsl_linalg_complex_householder_hv (ti, &h.vector, &w.vector);
         }
       return GSL_SUCCESS;
@@ -466,7 +466,7 @@ gsl_linalg_complex_QR_matQ (const gsl_matrix_complex * QR, const gsl_vector_comp
           gsl_vector_complex_const_view h = gsl_vector_complex_const_subvector (&(c.vector), i, M - i);
           gsl_matrix_complex_view m = gsl_matrix_complex_submatrix(A, 0, i, A->size1, M - i);
           gsl_complex ti = gsl_vector_complex_get (tau, i);
-          /* we do not need the conjugate of ti here */ // TODO why?
+          /* we do not need the conjugate of ti here */
           gsl_linalg_complex_householder_mh (ti, &(h.vector), &(m.matrix));
         }
       return GSL_SUCCESS;
@@ -507,7 +507,7 @@ gsl_linalg_complex_QR_unpack (const gsl_matrix_complex * QR, const gsl_vector_co
           gsl_vector_complex_const_view h = gsl_vector_complex_const_subvector (&c.vector, i, M - i);
           gsl_matrix_complex_view m = gsl_matrix_complex_submatrix (Q, i, i, M - i, M - i);
           gsl_complex ti = gsl_vector_complex_get (tau, i);
-          /* we do not need the conjugate of ti here */ // TODO why?
+          /* we do not need the conjugate of ti here */
           gsl_linalg_complex_householder_hm (ti, &h.vector, &m.matrix);
         }
 
