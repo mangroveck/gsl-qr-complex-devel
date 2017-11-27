@@ -181,6 +181,20 @@ create_general_matrix(unsigned long size1, unsigned long size2)
   return m;
 }
 
+gsl_matrix_complex *
+create_general_matrix_complex(unsigned long size1, unsigned long size2)
+{
+  unsigned long i, j;
+  gsl_matrix_complex * m = gsl_matrix_complex_alloc(size1, size2);
+  for(i=0; i<size1; i++) {
+    for(j=0; j<size2; j++) {
+      gsl_matrix_complex_set(m, i, j, gsl_complex_rect(1.0/(i+j+1.0),1.0/(1+size1+size2-i-j)));
+      //printf("%d %d %e %e\n", i, j, 1.0/(i+j+1.0),1.0/(1+size1+size2-i-j));
+    }
+  }
+  return m;
+}
+
 gsl_matrix *
 create_singular_matrix(unsigned long size1, unsigned long size2)
 {
@@ -208,6 +222,20 @@ create_vandermonde_matrix(unsigned long size)
   for(i=0; i<size; i++) {
     for(j=0; j<size; j++) {
       gsl_matrix_set(m, i, j, pow(i + 1.0, size - j - 1.0));
+    }
+  }
+  return m;
+}
+
+gsl_matrix_complex *
+create_vandermonde_matrix_complex(unsigned long size)
+{
+  unsigned long i, j;
+  gsl_matrix_complex * m = gsl_matrix_complex_alloc(size, size);
+  for(i=0; i<size; i++) {
+    for(j=0; j<size; j++) {
+      gsl_complex a = gsl_complex_rect(i + 1.0, i*0.5);
+      gsl_matrix_complex_set(m, i, j, gsl_complex_pow_real(a, size - j - 1.0));
     }
   }
   return m;
@@ -349,6 +377,10 @@ gsl_matrix * m35;
 gsl_matrix * m53;
 gsl_matrix * m97;
 
+gsl_matrix_complex * m35c;
+gsl_matrix_complex * m53c;
+gsl_matrix_complex * m97c;
+
 gsl_matrix * s35;
 gsl_matrix * s53;
 
@@ -375,6 +407,10 @@ gsl_matrix * bigsparse;
 
 double m53_lssolution[] = {52.5992295702070, -337.7263113752073, 
                            351.8823436427604};
+double m53c_lssolution[] = {-2.42665224693892, -6.55069697384445,
+                            -5.47280378950620, 35.11460791136691,
+                            13.84982610972922,-36.12898835153614};
+                           
 double hilb2_solution[] = {-8.0, 18.0} ;
 double hilb3_solution[] = {27.0, -192.0, 210.0};
 double hilb4_solution[] = {-64.0, 900.0, -2520.0, 1820.0};
@@ -402,6 +438,18 @@ double vander4_solution[] = {0.0, 0.0, 1.0, 0.0};
 double vander12_solution[] = {0.0, 0.0, 0.0, 0.0,
                             0.0, 0.0, 0.0, 0.0, 
                             0.0, 0.0, 1.0, 0.0}; 
+
+gsl_matrix_complex * vander2c;
+gsl_matrix_complex * vander3c;
+gsl_matrix_complex * vander4c;
+gsl_matrix_complex * vander12c;
+
+double vander2c_solution[] = {1.0, 0.0, 0.0, 0.0}; 
+double vander3c_solution[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; 
+double vander4c_solution[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; 
+double vander12c_solution[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                            0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; 
 
 gsl_matrix * moler10;
 
@@ -891,6 +939,297 @@ int test_QR_decomp(void)
 
   f = test_QR_decomp_dim(vander12, 0.0005); /* FIXME: bad accuracy */
   gsl_test(f, "  QR_decomp vander(12)");
+  s += f;
+
+  return s;
+}
+
+int
+test_QRc_solve_dim(const gsl_matrix_complex * m, const double * actual, double eps)
+{
+  int s = 0;
+  unsigned long i, dim = m->size1;
+
+  gsl_vector_complex * rhs = gsl_vector_complex_alloc(dim);
+  gsl_matrix_complex * qr  = gsl_matrix_complex_alloc(dim,dim);
+  gsl_vector_complex * d = gsl_vector_complex_alloc(dim);
+  gsl_vector_complex * x = gsl_vector_complex_alloc(dim);
+
+  gsl_matrix_complex_memcpy(qr,m);
+  for(i=0; i<dim; i++) {
+    gsl_complex a = gsl_complex_rect(i+1.0, 0.5*i);
+    gsl_vector_complex_set(rhs, i, a);
+  }
+  s += gsl_linalg_complex_QR_decomp(qr, d);
+  s += gsl_linalg_complex_QR_solve(qr, d, rhs, x);
+  for(i=0; i<dim; i++) {
+    int foo_r = check(GSL_REAL(gsl_vector_complex_get(x, i)), actual[2*i], eps);
+    int foo_i = check(GSL_IMAG(gsl_vector_complex_get(x, i)), actual[2*i+1], eps);
+    if(foo_r || foo_i) {
+      printf("%3lu[%lu]: %22.18g   %22.18g\n", dim, i, GSL_REAL(gsl_vector_complex_get(x, i)), actual[2*i]);
+      printf("%3lu[%lu]: %22.18g   %22.18g\n", dim, i, GSL_IMAG(gsl_vector_complex_get(x, i)), actual[2*i+1]);
+    }
+    s += foo_r + foo_i;
+  }
+
+  gsl_vector_complex_free(x);
+  gsl_vector_complex_free(d);
+  gsl_matrix_complex_free(qr);
+  gsl_vector_complex_free(rhs);
+
+  return s;
+}
+
+int test_QRc_solve(void)
+{
+  int f;
+  int s = 0;
+
+  f = test_QRc_solve_dim(vander2c, vander2c_solution, 16.0 * GSL_DBL_EPSILON);
+  gsl_test(f, "  QRc_solve vander(2)");
+  s += f;
+
+  f = test_QRc_solve_dim(vander3c, vander3c_solution, 64.0 * GSL_DBL_EPSILON);
+  gsl_test(f, "  QRc_solve vander(3)");
+  s += f;
+
+  f = test_QRc_solve_dim(vander4c, vander4c_solution, 1024.0 * GSL_DBL_EPSILON);
+  gsl_test(f, "  QRc_solve vander(4)");
+  s += f;
+
+  f = test_QRc_solve_dim(vander12c, vander12c_solution, 0.05);
+  gsl_test(f, "  QRc_solve vander(12)");
+  s += f;
+
+  return s;
+}
+
+int
+test_QRc_QRsolve_dim(const gsl_matrix_complex * m, const double * actual, double eps)
+{
+  int s = 0;
+  unsigned long i, dim = m->size1;
+
+  gsl_vector_complex * rhs = gsl_vector_complex_alloc(dim);
+  gsl_matrix_complex * qr  = gsl_matrix_complex_alloc(dim,dim);
+  gsl_matrix_complex * q  = gsl_matrix_complex_alloc(dim,dim);
+  gsl_matrix_complex * r  = gsl_matrix_complex_alloc(dim,dim);
+  gsl_vector_complex * d = gsl_vector_complex_alloc(dim);
+  gsl_vector_complex * x = gsl_vector_complex_alloc(dim);
+
+  gsl_matrix_complex_memcpy(qr,m);
+  for(i=0; i<dim; i++) {
+    gsl_complex a = gsl_complex_rect(i+1.0, 0.5*i);
+    gsl_vector_complex_set(rhs, i, a);
+  }
+  s += gsl_linalg_complex_QR_decomp(qr, d);
+  s += gsl_linalg_complex_QR_unpack(qr, d, q, r);
+  s += gsl_linalg_complex_QR_QRsolve(q, r, rhs, x);
+  for(i=0; i<dim; i++) {
+    int foo_r = check(GSL_REAL(gsl_vector_complex_get(x, i)), actual[2*i], eps);
+    int foo_i = check(GSL_IMAG(gsl_vector_complex_get(x, i)), actual[2*i+1], eps);
+    if(foo_r || foo_i) {
+      printf("%3lu[%lu]: %22.18g   %22.18g\n", dim, i, GSL_REAL(gsl_vector_complex_get(x, i)), actual[2*i]);
+      printf("%3lu[%lu]: %22.18g   %22.18g\n", dim, i, GSL_IMAG(gsl_vector_complex_get(x, i)), actual[2*i+1]);
+    }
+    s += foo_r || foo_i;
+  }
+
+  gsl_vector_complex_free(x);
+  gsl_vector_complex_free(d);
+  gsl_matrix_complex_free(qr);
+  gsl_matrix_complex_free(q);
+  gsl_matrix_complex_free(r);
+  gsl_vector_complex_free(rhs);
+  return s;
+}
+
+int test_QRc_QRsolve(void)
+{
+  int f;
+  int s = 0;
+
+  f = test_QRc_QRsolve_dim(vander2c, vander2c_solution, 8.0 * GSL_DBL_EPSILON);
+  gsl_test(f, "  QRc_QRsolve vander(2)");
+  s += f;
+
+  f = test_QRc_QRsolve_dim(vander3c, vander3c_solution, 64.0 * GSL_DBL_EPSILON);
+  gsl_test(f, "  QRc_QRsolve vander(3)");
+  s += f;
+
+  f = test_QRc_QRsolve_dim(vander4c, vander4c_solution, 1024.0 * GSL_DBL_EPSILON);
+  gsl_test(f, "  QRc_QRsolve vander(4)");
+  s += f;
+
+  f = test_QRc_QRsolve_dim(vander12c, vander12c_solution, 0.05);
+  gsl_test(f, "  QRc_QRsolve vander(12)");
+  s += f;
+
+  return s;
+}
+
+int
+test_QRc_lssolve_dim(const gsl_matrix_complex * m, const double * actual, double eps)
+{
+  int s = 0;
+  unsigned long i, M = m->size1, N = m->size2;
+
+  gsl_vector_complex * rhs = gsl_vector_complex_alloc(M);
+  gsl_matrix_complex * qr  = gsl_matrix_complex_alloc(M,N);
+  gsl_vector_complex * d = gsl_vector_complex_alloc(N);
+  gsl_vector_complex * x = gsl_vector_complex_alloc(N);
+  gsl_vector_complex * r = gsl_vector_complex_alloc(M);
+  gsl_vector_complex * res = gsl_vector_complex_alloc(M);
+
+  gsl_matrix_complex_memcpy(qr,m);
+  for(i=0; i<M; i++) {
+    gsl_complex a = gsl_complex_rect(i+1.0, 0.5*i);
+    gsl_vector_complex_set(rhs, i, a);
+  }
+  s += gsl_linalg_complex_QR_decomp(qr, d);
+  s += gsl_linalg_complex_QR_lssolve(qr, d, rhs, x, res);
+
+  for(i=0; i<N; i++) {
+    int foo_r = check(GSL_REAL(gsl_vector_complex_get(x, i)), actual[2*i], eps);
+    int foo_i = check(GSL_IMAG(gsl_vector_complex_get(x, i)), actual[2*i+1], eps);
+    if(foo_r || foo_i) {
+      printf("(%3lu,%3lu)[%lu]: %22.18g   %22.18g\n", M, N, i, GSL_REAL(gsl_vector_complex_get(x, i)), actual[2*i]);
+      printf("(%3lu,%3lu)[%lu]: %22.18g   %22.18g\n", M, N, i, GSL_IMAG(gsl_vector_complex_get(x, i)), actual[2*i+1]);
+    }
+    s += foo_r + foo_i;
+  }
+
+  /* compute residual r = b - m x */
+  if (M == N) {
+    gsl_vector_complex_set_zero(r);
+  } else {
+    gsl_vector_complex_memcpy(r, rhs);
+    gsl_blas_zgemv(CblasNoTrans, gsl_complex_rect(-1.0, 0.0), m, x, GSL_COMPLEX_ONE, r);
+  };
+
+  for(i=0; i<N; i++) {
+    int foo_r = check(GSL_REAL(gsl_vector_complex_get(res, i)), GSL_REAL(gsl_vector_complex_get(r,i)), sqrt(eps));
+    int foo_i = check(GSL_IMAG(gsl_vector_complex_get(res, i)), GSL_IMAG(gsl_vector_complex_get(r,i)), sqrt(eps));
+    if(foo_r || foo_i) {
+      printf("(%3lu,%3lu)[%lu]: %22.18g   %22.18g\n", M, N, i, GSL_REAL(gsl_vector_complex_get(res, i)), GSL_REAL(gsl_vector_complex_get(r,i)));
+      printf("(%3lu,%3lu)[%lu]: %22.18g   %22.18g\n", M, N, i, GSL_IMAG(gsl_vector_complex_get(res, i)), GSL_IMAG(gsl_vector_complex_get(r,i)));
+    }
+    s += foo_r + foo_i;
+  }
+
+  gsl_vector_complex_free(r);
+  gsl_vector_complex_free(res);
+  gsl_vector_complex_free(x);
+  gsl_vector_complex_free(d);
+  gsl_matrix_complex_free(qr);
+  gsl_vector_complex_free(rhs);
+
+  return s;
+}
+
+int test_QRc_lssolve(void)
+{
+  int f;
+  int s = 0;
+
+  f = test_QRc_lssolve_dim(m53c, m53c_lssolution, 2 * 64.0 * GSL_DBL_EPSILON);
+  gsl_test(f, "  QRc_lssolve m(5,3)");
+  s += f;
+
+  f = test_QRc_lssolve_dim(vander2c, vander2c_solution, 16.0 * GSL_DBL_EPSILON);
+  gsl_test(f, "  QRc_lssolve vander(2)");
+  s += f;
+
+  f = test_QRc_lssolve_dim(vander3c, vander3c_solution, 64.0 * GSL_DBL_EPSILON);
+  gsl_test(f, "  QRc_lssolve vander(3)");
+  s += f;
+
+  f = test_QRc_lssolve_dim(vander4c, vander4c_solution, 1024.0 * GSL_DBL_EPSILON);
+  gsl_test(f, "  QRc_lssolve vander(4)");
+  s += f;
+
+  f = test_QRc_lssolve_dim(vander12c, vander12c_solution, 0.05);
+  gsl_test(f, "  QRc_lssolve vander(12)");
+  s += f;
+
+  return s;
+}
+
+
+int
+test_QRc_decomp_dim(const gsl_matrix_complex * m, double eps)
+{
+  int s = 0;
+  unsigned long i,j, M = m->size1, N = m->size2;
+
+  gsl_matrix_complex * qr = gsl_matrix_complex_alloc(M,N);
+  gsl_matrix_complex * a  = gsl_matrix_complex_alloc(M,N);
+  gsl_matrix_complex * q  = gsl_matrix_complex_alloc(M,M);
+  gsl_matrix_complex * r  = gsl_matrix_complex_alloc(M,N);
+  gsl_vector_complex * d = gsl_vector_complex_alloc(GSL_MIN(M,N));
+
+  gsl_matrix_complex_memcpy(qr,m);
+
+  s += gsl_linalg_complex_QR_decomp(qr, d);
+  s += gsl_linalg_complex_QR_unpack(qr, d, q, r);
+  
+  /* compute a = q r */
+  gsl_blas_zgemm (CblasNoTrans, CblasNoTrans, GSL_COMPLEX_ONE, q, r, GSL_COMPLEX_ZERO, a);
+
+  for(i=0; i<M; i++) {
+    for(j=0; j<N; j++) {
+      gsl_complex aij = gsl_matrix_complex_get(a, i, j);
+      gsl_complex mij = gsl_matrix_complex_get(m, i, j);
+      int foo_r = check(GSL_REAL(aij), GSL_REAL(mij), eps);
+      int foo_i = check(GSL_IMAG(aij), GSL_IMAG(mij), eps);
+      if(foo_r || foo_i) {
+        printf("(%3lu,%3lu)[%lu,%lu]: %22.18g   %22.18g\n", M, N, i,j, GSL_REAL(aij), GSL_REAL(mij));
+        printf("(%3lu,%3lu)[%lu,%lu]: %22.18g   %22.18g\n", M, N, i,j, GSL_IMAG(aij), GSL_IMAG(mij));
+      }
+      s += foo_r + foo_i;
+    }
+  }
+
+  gsl_vector_complex_free(d);
+  gsl_matrix_complex_free(qr);
+  gsl_matrix_complex_free(a);
+  gsl_matrix_complex_free(q);
+  gsl_matrix_complex_free(r);
+
+  return s;
+}
+
+int test_QRc_decomp(void)
+{
+  int f;
+  int s = 0;
+
+  f = test_QRc_decomp_dim(m35c, 2 * 8.0 * GSL_DBL_EPSILON);
+  gsl_test(f, "  QR_decomp m(3,5)");
+  s += f;
+
+  f = test_QRc_decomp_dim(m53c, 2 * 64.0 * GSL_DBL_EPSILON);
+  gsl_test(f, "  QR_decomp m(5,3)");
+  s += f;
+
+  f = test_QRc_decomp_dim(m97c, 2 * 64.0 * GSL_DBL_EPSILON);
+  gsl_test(f, "  QR_decomp m(9,7)");
+  s += f;
+
+  f = test_QRc_decomp_dim(vander2c, 8.0 * GSL_DBL_EPSILON);
+  gsl_test(f, "  QRc_decomp vander(2)");
+  s += f;
+
+  f = test_QRc_decomp_dim(vander3c, 64.0 * GSL_DBL_EPSILON);
+  gsl_test(f, "  QRc_decomp vander(3)");
+  s += f;
+
+  f = test_QRc_decomp_dim(vander4c, 1024.0 * GSL_DBL_EPSILON);
+  gsl_test(f, "  QRc_decomp vander(4)");
+  s += f;
+
+  f = test_QRc_decomp_dim(vander12c, 0.0005); /* FIXME: bad accuracy */
+  gsl_test(f, "  QRc_decomp vander(12)");
   s += f;
 
   return s;
@@ -4354,6 +4693,10 @@ main(void)
   m53 = create_general_matrix(5,3);
   m97 = create_general_matrix(9,7);
 
+  m35c = create_general_matrix_complex(3,5);
+  m53c = create_general_matrix_complex(5,3);
+  m97c = create_general_matrix_complex(9,7);
+
   s35 = create_singular_matrix(3,5);
   s53 = create_singular_matrix(5,3);
 
@@ -4366,6 +4709,11 @@ main(void)
   vander3 = create_vandermonde_matrix(3);
   vander4 = create_vandermonde_matrix(4);
   vander12 = create_vandermonde_matrix(12);
+
+  vander2c = create_vandermonde_matrix_complex(2);
+  vander3c = create_vandermonde_matrix_complex(3);
+  vander4c = create_vandermonde_matrix_complex(4);
+  vander12c = create_vandermonde_matrix_complex(12);
 
   moler10 = create_moler_matrix(10);
 
@@ -4410,7 +4758,9 @@ main(void)
   gsl_test(test_LU_solve(),              "LU Decomposition and Solve");
   gsl_test(test_LUc_solve(),             "Complex LU Decomposition and Solve");
   gsl_test(test_QR_decomp(),             "QR Decomposition");
+  gsl_test(test_QRc_decomp(),            "Complex QR Decomposition");
   gsl_test(test_QR_solve(),              "QR Solve");
+  gsl_test(test_QRc_solve(),             "Complex QR Solve");
   gsl_test(test_LQ_solve(),              "LQ Solve");
   gsl_test(test_PTLQ_solve(),            "PTLQ Solve");
 
@@ -4422,7 +4772,9 @@ main(void)
   gsl_test(test_PTLQ_solve(),            "PTLQ Solve");
 
   gsl_test(test_QR_QRsolve(),            "QR QR Solve");
+  gsl_test(test_QRc_QRsolve(),           "Complex QR QR Solve");
   gsl_test(test_QR_lssolve(),            "QR LS Solve");
+  gsl_test(test_QRc_lssolve(),           "Complex QR LS Solve");
   gsl_test(test_QR_update(),             "QR Rank-1 Update");
   gsl_test(test_QRPT_decomp(),           "QRPT Decomposition");
   gsl_test(test_QRPT_lssolve(),          "QRPT LS Solve");

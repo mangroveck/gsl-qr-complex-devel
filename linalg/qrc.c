@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-/* Author:  G. Jungman, C. Krueger */
+/* Author:  G. Jungman, adapted by C. Krueger */
 
 #include <config.h>
 #include <stdlib.h>
@@ -31,16 +31,17 @@
 
 #include "apply_givens.c"
 
-/* TODO finish converting functios
-   TODO correct documentation
-   TODO write test cases
-*/
+/*
+ * This code is essentially the same as in qr.c but adapted for complex
+ * values matrices. Adapting the function gsl_linalg_QR_update() is
+ * a bit more involved and has not been done yet.
+ */
 
-/* Factorise a general M x N matrix A into
+/* Factorise a general complex-valued M x N matrix A into
  *  
  *   A = Q R
  *
- * where Q is orthogonal (M x M) and R is upper triangular (M x N).
+ * where Q is unitary (M x M) and R is upper triangular (M x N).
  *
  * Q is stored as a packed set of Householder transformations in the
  * strict lower triangular part of the input matrix.
@@ -104,7 +105,7 @@ gsl_linalg_complex_QR_decomp (gsl_matrix_complex * A, gsl_vector_complex * tau)
 
 /* Solves the system A x = b using the QR factorisation,
 
- *  R x = Q^T b
+ *  R x = Q^* b
  *
  * to obtain x. Based on SLATEC code. 
  */
@@ -140,7 +141,7 @@ gsl_linalg_complex_QR_solve (const gsl_matrix_complex * QR, const gsl_vector_com
 
 /* Solves the system A x = b in place using the QR factorisation,
 
- *  R x = Q^T b
+ *  R x = Q^* b
  *
  * to obtain x. Based on SLATEC code. 
  */
@@ -159,7 +160,7 @@ gsl_linalg_complex_QR_svx (const gsl_matrix_complex * QR, const gsl_vector_compl
     }
   else
     {
-      /* compute rhs = Q^T b */
+      /* compute rhs = Q^* b */
 
       gsl_linalg_complex_QR_QTvec (QR, tau, x);
 
@@ -208,7 +209,7 @@ gsl_linalg_complex_QR_lssolve (const gsl_matrix_complex * QR, const gsl_vector_c
 
       gsl_vector_complex_memcpy(residual, b);
 
-      /* compute rhs = Q^T b */
+      /* compute rhs = Q^* b */
 
       gsl_linalg_complex_QR_QTvec (QR, tau, residual);
 
@@ -218,7 +219,7 @@ gsl_linalg_complex_QR_lssolve (const gsl_matrix_complex * QR, const gsl_vector_c
 
       gsl_blas_ztrsv (CblasUpper, CblasNoTrans, CblasNonUnit, &(R.matrix), x);
 
-      /* Compute residual = b - A x = Q (Q^T b - R x) */
+      /* Compute residual = b - A x = Q (Q^* b - R x) */
       
       gsl_vector_complex_set_zero(&(c.vector));
 
@@ -331,7 +332,7 @@ gsl_linalg_complex_R_svx (const gsl_matrix_complex * R, gsl_vector_complex * x)
 }
 
 
-/* Form the product Q^T v  from a QR factorized matrix 
+/* Form the product Q^* v  from a QR factorized matrix 
  */
 
 int
@@ -352,7 +353,7 @@ gsl_linalg_complex_QR_QTvec (const gsl_matrix_complex * QR, const gsl_vector_com
     {
       size_t i;
 
-      /* compute Q^T v */
+      /* compute Q^* v */
 
       for (i = 0; i < GSL_MIN (M, N); i++)
         {
@@ -402,7 +403,7 @@ gsl_linalg_complex_QR_Qvec (const gsl_matrix_complex * QR, const gsl_vector_comp
     }
 }
 
-/* Form the product Q^T A from a QR factorized matrix */
+/* Form the product Q^* A from a QR factorized matrix */
 
 int
 gsl_linalg_complex_QR_QTmat (const gsl_matrix_complex * QR, const gsl_vector_complex * tau, gsl_matrix_complex * A)
@@ -422,7 +423,7 @@ gsl_linalg_complex_QR_QTmat (const gsl_matrix_complex * QR, const gsl_vector_com
     {
       size_t i;
 
-      /* compute Q^T A */
+      /* compute Q^* A */
 
       for (i = 0; i < GSL_MIN (M, N); i++)
         {
@@ -471,7 +472,7 @@ gsl_linalg_complex_QR_matQ (const gsl_matrix_complex * QR, const gsl_vector_comp
     }
 }
 
-/*  Form the orthogonal matrix Q from the packed QR matrix */
+/*  Form the unitary matrix Q from the packed QR matrix */
 
 int
 gsl_linalg_complex_QR_unpack (const gsl_matrix_complex * QR, const gsl_vector_complex * tau, gsl_matrix_complex * Q, gsl_matrix_complex * R)
@@ -525,6 +526,10 @@ gsl_linalg_complex_QR_unpack (const gsl_matrix_complex * QR, const gsl_vector_co
 }
 // 
 // 
+// TODO: This function still needs adapting to complex numbers.
+//       However, this also requires the functions supplied by GSL
+//       for the Givens rotations (gsl_linalg_givens_*) to be adapted.
+//
 // /* Update a QR factorisation for A= Q R ,  A' = A + u v^T,
 // 
 //  * Q' R' = QR + u v^T
@@ -625,7 +630,7 @@ gsl_linalg_complex_QR_QRsolve (gsl_matrix_complex * Q, gsl_matrix_complex * R, c
     }
   else
     {
-      /* compute sol = Q^T b */
+      /* compute sol = Q^* b */
 
       gsl_blas_zgemv (CblasConjTrans, GSL_COMPLEX_ONE, Q, b, GSL_COMPLEX_ZERO, x);
 
