@@ -1,6 +1,7 @@
 /* linalg/qrc.c
  * 
  * Copyright (C) 1996, 1997, 1998, 1999, 2000, 2007 Gerard Jungman, Brian Gough
+ * Copyright (C) 2017 Christian Krueger
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-/* Author:  G. Jungman, adapted by C. Krueger */
+/* Author:  G. Jungman, modified by C. Krueger */
 
 #include <config.h>
 #include <stdlib.h>
@@ -33,7 +34,7 @@
 
 /*
  * This code is essentially the same as in qr.c but adapted for complex
- * values matrices. Adapting the function gsl_linalg_QR_update() is
+ * valued matrices. Adapting the function gsl_linalg_QR_update() is
  * a bit more involved and has not been done yet.
  */
 
